@@ -63,7 +63,24 @@ def visualize(df, data_index):
     except Exception as error:
         return error
 
-#visualize(df, 1)
+def get_optimizer(lr=1e-3, optimizer="adam"):
+    "Select optmizer between adam and sgd with momentum"
+    if optimizer.lower() == "adam":
+        return tf.keras.optimizers.Adam(learning_rate=lr)
+    if optimizer.lower() == "sgd":
+        return tf.keras.optimizers.SGD(learning_rate=lr, momentum=0.1)
+
+
+def get_labels(ds):
+    labels = []
+    for _, label in ds.unbatch():
+        labels.append(label)
+    labels = np.array(labels)
+    return labels
+
+train_labels = get_labels(train_ds)
+test_labels = get_labels(test_ds)
+
 
 
 
