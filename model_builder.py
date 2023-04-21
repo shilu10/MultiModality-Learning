@@ -1,5 +1,6 @@
 import tensorflow.keras as keras 
 import tensorflow as tf 
+import tensorflow_hub as hub 
 import pandas as pd 
 import numpy as np 
 
@@ -40,7 +41,7 @@ class ModelBuilder:
         embeddings_2 = resnet_v2(preprocessed_2)
         embeddings = keras.layers.Concatenate()([embeddings_1, embeddings_2])
 
-        outputs = project_embeddings(
+        outputs = self.project_embeddings(
             embeddings, num_projection_layers, projection_dims, dropout_rate
         )
         return keras.Model([image_1, image_2], outputs, name="vision_encoder")
@@ -58,7 +59,7 @@ class ModelBuilder:
 
         embeddings = roberta(text_inputs)["pooled_output"]
 
-        outputs = project_embeddings(
+        outputs = self.project_embeddings(
             embeddings, num_projection_layers, projection_dims, dropout_rate
         )
         return keras.Model(text_inputs, outputs, name="text_encoder")
@@ -75,10 +76,10 @@ class ModelBuilder:
             for feature in bert_input_features
         }
 
-        vision_encoder = create_vision_encoder(
+        vision_encoder = self.create_vision_encoder(
             num_projection_layers, projection_dims, dropout_rate, vision_trainable
         )
-        text_encoder = create_text_encoder(
+        text_encoder = self.create_text_encoder(
             roberta_encoder_path, bert_input_features, num_projection_layers, projection_dims, dropout_rate, text_trainable
         )
         

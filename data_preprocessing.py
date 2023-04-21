@@ -33,15 +33,15 @@ class DataPreprocessor:
         return encoder_inputs
 
     def preprocess_text_and_image(sample, roberta_preprocessor_model, roberta_input_features, img_shape):
-        image_1 = reshape_image(sample["image_1_path"], img_shape)
-        image_2 = reshape_image(sample["image_2_path"], img_shape)
-        encoder_inputs = get_encoder_input(roberta_preprocessor_model, sample["text_1"], sample["text_2"], roberta_input_features)
+        image_1 = self.reshape_image(sample["image_1_path"], img_shape)
+        image_2 = self.reshape_image(sample["image_2_path"], img_shape)
+        encoder_inputs = self.get_encoder_input(roberta_preprocessor_model, sample["text_1"], sample["text_2"], roberta_input_features)
         return {"image_1": image_1, "image_2": image_2, "text": encoder_inputs}
 
     def prepare_dataset(dataframe, batch_size, auto, training=True):
-        ds = dataframe_to_tensor_dataset(dataframe)
+        ds = self.dataframe_to_tensor_dataset(dataframe)
         if training:
             ds = ds.shuffle(len(train_df))
-        ds = ds.map(lambda x, y: (preprocess_text_and_image(x, roberta_preprocessor_model, ROBERTA_INPUT_FEATURES, IMG_SHAPE), y)).cache()
+        ds = ds.map(lambda x, y: (self.preprocess_text_and_image(x, roberta_preprocessor_model, ROBERTA_INPUT_FEATURES, IMG_SHAPE), y)).cache()
         ds = ds.batch(batch_size).prefetch(auto)
         return ds
