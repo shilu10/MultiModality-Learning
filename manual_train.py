@@ -3,11 +3,26 @@ import tensorflow as tf
 
 
 class ManualTrainer: 
-    
     def __init__(self):
+        """
+            this class contains the code for the manual model training.
+        """
         pass 
 
     def train_step(x, y, model, optimizer, loss_fn, train_acc_metric):
+        """
+            this method does the manual train step using the gradient tape.
+            Params: 
+                x(type: tf.data.Dataset): Independent Variable of type tf.data.Dataset.
+                y(type: tf.data.Dataset): dependent Variable of type tf.data.Dataset.
+                model(type; tf.models.Model): keras model, that will be used for the prediction.
+                optimizer(tf.optimizer): Optimizer for updating the gradients.
+                loss_fn(type: tf.losses): Loss function for calculating the loss of the model.
+                train_acc_metric(type; tf.accuracy): Metric function for evaluation the data.
+            
+            Return(type: float)
+                this method returns the loss value of the training data.
+        """
         with tf.GradientTape() as tape:
             logits = model(train_ds, training=True)
             loss = loss_fn(y, logits)
@@ -20,6 +35,18 @@ class ManualTrainer:
         return loss_value
 
     def test_step(x, y, model, loss_fn, val_acc_metric):
+        """
+            this method does the manual test step.
+            Params: 
+                x(type: tf.data.Dataset): Independent Variable of type tf.data.Dataset.
+                y(type: tf.data.Dataset): dependent Variable of type tf.data.Dataset.
+                model(type; tf.models.Model): keras model, that will be used for the prediction.
+                loss_fn(type: tf.losses): Loss function for calculating the loss of the model.
+                val_acc_metric(type; tf.accuracy): Metric function for evaluation the data.
+            
+            Return(type: float)
+                this method returns the loss value of the validation or testing data.
+        """
         val_logits = model(x, training=False)
         loss_value = loss_fn(y, val_logits)
         val_acc_metric.update_state(y, val_logits)
@@ -36,6 +63,20 @@ class ManualTrainer:
             epochs=10, 
             log_step=200, 
             val_log_step=50):
+
+        """
+            this method, does the manual train and test step for multiple epochs
+            Params: 
+                epochs(type; int): Number of epoch model needed to be trained.
+                log_step(type:int): Number of train step.
+                val_log_step(type:int): Number of val step.
+                x(type: tf.data.Dataset): Independent Variable of type tf.data.Dataset.
+                y(type: tf.data.Dataset): dependent Variable of type tf.data.Dataset.
+                model(type; tf.models.Model): keras model, that will be used for the prediction.
+                loss_fn(type: tf.losses): Loss function for calculating the loss of the model.
+                val_acc_metric(type; tf.accuracy): Metric function for evaluation the data.
+
+        """
     
         for epoch in range(epochs):
             print("\nStart of epoch %d" % (epoch,))

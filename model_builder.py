@@ -8,9 +8,27 @@ import numpy as np
 class ModelBuilder:
     
     def __init__(self):
+        """
+            this class contains the code for the keras model builder.
+            Methods:
+                project_embeddings
+                create_vision_encoder
+                create_text_encoder
+                create_multimodal_model
+        """
         pass 
 
     def project_embeddings(self, embeddings, num_projection_layers, projection_dims, dropout_rate):
+        """
+            this method, will create projection keras model, will get the embedding vector and project into higher dimension.
+            Params:
+                embeddings(type: vectors): Embedding vector from the encoder model.
+                num_projection_layers(type; int): Number of layer for the projection layer.
+                projection_dims(type: int): Integer value  for the hidden dimension of the dense layer.
+                dropout_rate(type: float): Dropout rate in the dropout layer.
+
+            Return(type: tf.keras.layers.Layer): returns the projection embedding layer.
+        """
         projected_embeddings = keras.layers.Dense(units=projection_dims)(embeddings)
         for _ in range(num_projection_layers):
             x = tf.nn.gelu(projected_embeddings)
@@ -22,7 +40,20 @@ class ModelBuilder:
 
 
     def create_vision_encoder(self, num_projection_layers, projection_dims, dropout_rate, trainable=False):
+        """
+            this method will creates the vision encoder model, which will get the image data, and creates the embedding of the
+            image, it also uses the resnet pretrained model for extracting the embedding.
+            Params:
+                num_projection_layers(type; int): Number of layer for the projection layer, needed for the project_embeddings 
+                method.
+                projection_dims(type: int): Integer value  for the hidden dimension of the dense layer for the project_embeddings 
+                method.
+                dropout_rate(type: float): Dropout rate in the dropout layer for the project_embeddings method.
 
+            Return(type: keras.models.Model)
+                this method returns the keras model for the vision encoder.
+
+        """
         resnet_v2 = keras.applications.ResNet50V2(
             include_top=False, weights="imagenet", pooling="avg"
         )
@@ -49,6 +80,22 @@ class ModelBuilder:
 
     def create_text_encoder(self, roberta_encoder_path, bert_input_features, 
                                     num_projection_layers, projection_dims, dropout_rate, trainable=False):
+        """
+            this method will creates the text encoder model, which will get the image data, and creates the embedding of the
+            image, it also uses the roberta language modeling pretrained model for extracting the embedding.
+            Params:
+                roberta_encoder_path(type: str): tensorflow hub path for the roberta encoder model.
+                bert_input_features(type: List): roberta encoder model, needs a specific featurs.(that features name)
+                num_projection_layers(type; int): Number of layer for the projection layer, needed for the project_embeddings 
+                method.
+                projection_dims(type: int): Integer value  for the hidden dimension of the dense layer for the project_embeddings 
+                method.
+                dropout_rate(type: float): Dropout rate in the dropout layer for the project_embeddings method.
+
+            Return(type: keras.models.Model)
+                this method returns the keras model for the text encoder.
+
+        """
         roberta = hub.KerasLayer(roberta_encoder_path, name="bert",)
         roberta.trainable = trainable
         
@@ -66,7 +113,27 @@ class ModelBuilder:
 
 
     def create_multimodal_model(self, roberta_encoder_path, img_input_dims, bert_input_features, num_projection_layers=1, 
-                                        projection_dims=256, dropout_rate=0.1, vision_trainable=False, text_trainable=False, rate=0.2):
+                                        projection_dims=256, dropout_rate=0.1, vision_trainable=False, text_trainable=False, 
+                                        rate=0.2):
+        """
+            this method, creates the multimodal model, which includes the text encoder and image encoder model, and concatenates
+            the results and also it uses the attention layer.
+            Params:
+                roberta_encoder_path(type: str): tensorflow hub path for the roberta encoder model.
+                bert_input_features(type: List): roberta encoder model, needs a specific featurs.(that features name).
+                img_input_dims(type: tuple): input image dimension.
+                num_projection_layers(type; int): Number of layer for the projection layer, needed for the project_embeddings 
+                method.
+                projection_dims(type: int): Integer value  for the hidden dimension of the dense layer for the project_embeddings 
+                method.
+                dropout_rate(type; float): Dropout value foe the projection embedding model.
+                vision_trainable(type: bool): Whether need to train the vision resent pretrained model or not.
+                text_trainable(type: bool): Whether need to train the text roberta pretrained model or not.
+            
+            Return(type: keras.models.Model)
+                this method will returns the keras model for the multimodal model
+
+        """
         
         image_1 = keras.Input(shape=img_input_dims, name="image_1")
         image_2 = keras.Input(shape=img_input_dims, name="image_2")
